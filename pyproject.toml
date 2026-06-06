@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "grid-trading-bot"
-version = "0.1.0"
+version = "0.2.0"
 description = "Grid trading bot with a configurable price grid, simulated exchange, and backtest — by Viprasol Tech."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -28,7 +28,7 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Topic :: Office/Business :: Financial :: Investment",
 ]
-dependencies = ["pydantic>=2.6", "typer>=0.12", "rich>=13.7"]
+dependencies = ["pydantic>=2.6", "typer>=0.12", "rich>=13.7", "numpy>=1.26"]
 
 [project.optional-dependencies]
 dev = ["ruff>=0.4", "mypy>=1.10", "pytest>=8.0", "pytest-cov>=5.0"]

@@ -15,7 +15,8 @@ from pydantic import BaseModel, ConfigDict
 
 from grid_trading_bot.exchange import SimulatedExchange
 from grid_trading_bot.grid import GridStrategy
-from grid_trading_bot.models import Fill
+from grid_trading_bot.metrics import cagr, max_drawdown, sharpe_ratio
+from grid_trading_bot.models import Fill, Side
 
 
 class BacktestResult(BaseModel):
@@ -43,6 +44,21 @@ class BacktestResult(BaseModel):
         return len(self.fills)
 
     @property
+    def num_buys(self) -> int:
+        """Number of buy fills."""
+        return sum(1 for f in self.fills if f.order.side is Side.BUY)
+
+    @property
+    def num_sells(self) -> int:
+        """Number of sell fills."""
+        return sum(1 for f in self.fills if f.order.side is Side.SELL)
+
+    @property
+    def total_fees(self) -> float:
+        """Sum of all fees paid across every fill, in the quote asset."""
+        return sum(f.fee for f in self.fills)
+
+    @property
     def pnl(self) -> float:
         """Absolute profit/loss in the quote asset (final minus starting)."""
         return self.final_equity - self.starting_equity
@@ -53,6 +69,19 @@ class BacktestResult(BaseModel):
         if self.starting_equity == 0:
             return 0.0
         return 100.0 * self.pnl / self.starting_equity
+
+    @property
+    def max_drawdown_pct(self) -> float:
+        """Worst peak-to-trough decline of the equity curve, as a percentage."""
+        return 100.0 * max_drawdown(self.equity_curve)
+
+    def sharpe(self, periods_per_year: int = 252) -> float:
+        """Annualised Sharpe ratio of the equity curve."""
+        return sharpe_ratio(self.equity_curve, periods_per_year=periods_per_year)
+
+    def cagr_pct(self, periods_per_year: int = 252) -> float:
+        """Compound annual growth rate implied by the curve, as a percentage."""
+        return 100.0 * cagr(self.equity_curve, periods_per_year=periods_per_year)
 
 
 def run_backtest(
